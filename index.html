@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>DASH</title>
+        <style>
+            body{
+                margin:0;
+                background:#0f0f0f;
+                overflow:hidden;
+                font-family: Arial, sans-serif;
+                color:white;
+                text-align:center;
+            }
+            canvas{
+                display:block;
+                margin:0 auto;
+                background:#111;
+            }
+            #message{
+                position:absolute;
+                width:100%;
+                top:40%;
+                font-size:28px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="message">Press SPACE to start</div>
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+
+        <script>
+            const canvas = document.getElementById("gameCanvas");
+            const ctx = canvas.getContext("2d");
+
+            const groundY = 340;
+
+            let gameStarted=false;
+            let gameOver=false;
+
+            let player ={
+                x:100,
+                y:groundY,
+                size: 30,
+                velocityY:0,
+                jumpPower:-14,
+                gravity:0.7,
+                onGround:true
+            };
+
+            let obstacles=[];
+            let frameCount=0;
+            let score=0;
+
+            function spawnObstacle(){
+                let height = 20+ Math.random() * 60;
+
+                obstacles.push({
+                    x:canvas.width,
+                    width:30,
+                    height:height
+                });
+            }
+
+            function drawPlayer(){
+                ctx.fillStyle= "#00ffcc";
+                ctx.fillRect(player.x, player.y - player.size, player.size, player.size);
+            }
+
+            function drawTriangle(obs){
+                ctx.fillStyle="#ff4444";
+                ctx.beginPath();
+                ctx.moveTo(obs.x, groundY);
+                ctx.lineTo(obs.x + obs.width/2, groundY-obs.height);
+                ctx.lineTo(obs.x + obs.width, groundY);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            function update(){
+                if(!gameStarted || gameOver)return;
+                player.velocityY += player.gravity;
+                player.y += player.velocityY;
+
+                if(player.y >= groundY){
+                    player.y=groundY;
+                    player.velocityY = 0;
+                    player.onGround = true;
+                }else{
+                    player.onGround=false;
+                }
+
+                for(let i = 0; i < obstacles.length; i++){
+                    obstacles[i].x -= 5;
+                    if(player.x < obstacles[i].x + obstacles[i].width && player.x + player.size > obstacles[i].x && player.y > groundY - obstacles[i].height - player.size){
+                        endGame();
+                    }
+                }
+                obstacles = obstacles.filter(o => o.x > -50);
+
+                frameCount++;
+                if(frameCount % 90 === 0){
+                    spawnObstacle();
+                }
+                score++;
+            }
+
+            function draw(){
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                ctx.fillStyle="#333";
+                ctx.fillRect(0, groundY, canvas.width, 60);
+                drawPlayer();
+                for(let obs of obstacles){
+                    drawTriangle(obs);
+                }
+                ctx.font = "16px Arial";
+                ctx.fillStyle = "white";
+                ctx.fillText("Score: " + score, 10, 20);
+            }
+            function loop(){
+                update();
+                draw();
+                requestAnimationFrame(loop);
+            }
+            loop();
+
+            document.addEventListener("keydown", (e) => {
+                if(e.code === "Space"){
+                    if(!gameStarted){
+                        gameStarted = true;
+                        document.getElementById("message").style.display = "none";
+                    }
+                    if(gameOver){
+                        location.reload();
+                    }
+                    if(player.onGround){
+                        player.velocityY = player.jumpPower;
+                    }
+                }
+            });
+
+            function endGame(){
+                gameOver = true;
+                document.getElementById("message").style.display = "block";
+                document.getElementById("message").innerText = "Game Over : Press SPACE to restart";
+            }
+        </script>
+    </body>
+</html>
