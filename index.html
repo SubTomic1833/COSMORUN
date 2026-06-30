@@ -109,6 +109,7 @@
             let speed = 5;
             let nextLevelScore = 600;
             let cubeRotation =0;
+            let backgroundOffset=0;
 
             function spawnObstacle(){
                 let height = 20+ Math.random() * 60;
@@ -190,6 +191,12 @@
                     }
                 }
                 obstacles = obstacles.filter(o => o.x > -50);
+
+                backgroundOffset -= speed *0.4;
+                if(backgroundOffset <= -40){
+                    backgroundOffset = 0;
+                }
+
                 frameCount++;
                 if(frameCount % 90 === 0){
                     spawnObstacle();
@@ -202,8 +209,46 @@
                 }
             }
 
+            function drawBackground(){
+                ctx.fillStyle ="#111";
+                ctx.fillRect(0,0,canvas.width,groundY);
+                const gridSize = 40;
+                //ctx.strokeStyle = "rgba(0,255,204,0,08)";
+                const glow = 0.05 + Math.sin(frameCount*0.03) * 0.03;
+                ctx.strokeStyle = `rgba(0,255,204,${glow})`;
+                ctx.lineWidth = 1;
+
+                for(let x=-gridSize + backgroundOffset; x <= canvas.width; x += gridSize){
+                    ctx.beginPath();
+                    ctx.moveTo(x,0);
+                    ctx.lineTo(x, groundY);
+                    ctx.stroke();
+                }
+                for(let y=0; y <= groundY; y += gridSize){
+                    ctx.beginPath();
+                    ctx.moveTo(0,y);
+                    ctx.lineTo(canvas.width, y);
+                    ctx.stroke();
+                }
+
+                ctx.strokeStyle ="rgba(0,255,204,0.15)";
+                ctx.lineWidth = 2;
+
+                for(let x = backgroundOffset; x <= canvas.width; x += gridSize * 4){
+                    for(let y=0; y <= groundY; y += gridSize *4){
+                        ctx.strokeRect(
+                            x,
+                            y,
+                            gridSize*4,
+                            gridSize*4
+                        );
+                    }
+                }
+            }
+
             function draw(){
                 ctx.clearRect(0,0,canvas.width,canvas.height);
+                drawBackground();
                 ctx.fillStyle="#333";
                 ctx.fillRect(0, groundY, canvas.width, 60);
                 ctx.shadowColor = "#ff4444";
