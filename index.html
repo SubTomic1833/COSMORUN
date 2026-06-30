@@ -117,7 +117,7 @@
 
             let obstacles=[];
             let spawnTimer=0;
-            let nextSpawn = 60 + Math.random(0*60;)
+            let nextSpawn = 60 + Math.random() * 60;
             let frameCount=0;
             let score=0;
             let level = 1;
@@ -142,7 +142,7 @@
             function spawnObstacle(){
                 const type = Math.random() <0.5 ? "spike" : "block";
                 if(type === "spike"){
-                    let height=20 = Math.random() * 60;
+                    let height=20 + Math.random() * 60;
                     obstacles.push({
                         type:"spike",
                         x:canvas.width,
@@ -204,13 +204,23 @@
                 if(o.type === "spike"){
                     drawTriangle(o);
                 }
+
                 if(o.type === "block"){
                     ctx.fillStyle = "#d0d0d0";
-                    ctx.shadowColor="rgba(255,255,255,0.15)";
-                    ctx.shadowBlur=8;
-                    ctx.fillRect(o.x,groundY -o.height,o.width)
+                    ctx.shadowColor = "rgba(255,255,255,0.15)";
+                    ctx.shadowBlur = 8;
+
+                    ctx.fillRect(
+                        o.x,
+                        groundY - o.height,
+                        o.width,
+                        o.height
+                    );
+
+                    ctx.shadowBlur = 0;
                 }
             }
+            
 
             function update(){
                 if(!gameStarted || gameOver)return;
@@ -236,17 +246,32 @@
                     const px = player.x;
                     const py = player.y;
                     const ps = player.size;
-                    const ox = o.x;
-                    const ow = o.width;
-                    const oh = o.height;
-                    const xOverlap = px < ox + ow && px + ps > ox;
-                    if (xOverlap){
-                        const centerX = (px+ps/2)-ox;
-                        const t = centerX/ow;
-                        const triangleHeight = oh *(1-Math.abs(t -0.5)*2);
-                        const groundAtX = groundY - triangleHeight;
-                        if(py>groundAtX - ps){
+                    const xOverlap = px < o.x + o.width && px + ps > o.x;
+                    if(!xOverlap) continue;
+                    if(o.type === "spike"){
+                        const centerX = (px + ps/2) - o.x;
+                        const t = centerX / o.width;
+
+                        const spikeHeight = o.height * (1 - Math.abs(t - 0.5) * 2);
+                        const groundAtX = groundY - spikeHeight;
+
+                        if(py > groundAtX - ps){
                             endGame();
+                        }
+                    }
+                    if(o.type === "block"){
+                        const blockTop = groundY - o.height;
+                        const prevBottom = (py - player.velocityY) + ps;
+                        const currBottom = py + ps;
+                        const isFalling = player.velocityY >= 0;
+
+                        const wasAbove = prevBottom <= blockTop;
+                        const nowAtOrBelow = currBottom >= blockTop;
+
+                        if(wasAbove && nowAtOrBelow && isFalling){
+                            player.y = blockTop;
+                            player.velocityY = 0;
+                            player.onGround = true;
                         }
                     }
                 }
@@ -259,8 +284,11 @@
                 backgroundOffset -= speed *0.6;
 
                 frameCount++;
-                if(frameCount % 90 === 0){
+                spawnTimer++
+                if(spawnTimer > nextSpawn){
                     spawnObstacle();
+                    spawnTimer=0;
+                    nextSpawn=40 + Math.random()*(90 - level *5);
                 }
                 score++;
                 if (score >= nextLevelScore){
@@ -301,7 +329,7 @@
                 ctx.fillRect(0,groundY, canvas.width, 1);
                 drawPlayer();
                 for(let obs of obstacles){
-                    drawTriangle(obs);
+                    drawObstacle(obs);
                 }
                 ctx.font = "600 16px Inter, sans-serif";
                 ctx.fillStyle = "white";
