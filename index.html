@@ -11,15 +11,19 @@
                 margin: 0;
                 overflow: hidden;
                 font-family: 'inter', sans-serif;
-                color: white;
 
                 display: flex;
                 justify-content: center;
                 align-items: center;
                 height: 100vh;
-                background: linear-gradient(-45deg, #213a35, #111, #213a35, #111);
-                background-size:400% 400%;
-                animation: bgMove 10s ease infinite;
+                background:#050505;
+            }
+            body::before{
+                content:"";
+                position:fixed;
+                inset:0;
+                background:radial-gradient(circle at center, rgba(255,255,255,0.04), transparent 60%), radial-gradient(circle at 20% 30%, rgba(255,255,255,0.02), transparent 50%);
+                pointer-events:none;
             }
             @keyframes bgMove{
                 0%{background-position:0% 50%;}
@@ -30,10 +34,10 @@
             canvas{
                 display:block;
                 margin:0 auto;
-                background:#111;
-                border: 3px solid #00ffcc;
-                border-radius: 16px;
-                box-shadow: 0 0 15px #00ffcc;
+                background:#0a0a0a;
+                border: 1px solid rgba(255,255,255,0.08);
+                border-radius: 12px;
+                box-shadow: 0 0 40px rgba(0,0,0,0.8), inset 0 0 60px rgba(255,255,255,0.02);
             }
             #message{
                 position:absolute;
@@ -139,9 +143,9 @@
                 ctx.save();
                 ctx.translate(x+size/2, y+size/2);
                 ctx.rotate(cubeRotation);
-                ctx.shadowColor = "#00ffcc";
-                ctx.shadowBlur = 25;
-                ctx.fillStyle = "#00ffcc";
+                ctx.shadowColor = "#ffffff";
+                ctx.shadowBlur = 3;
+                ctx.fillStyle = "#eaeaea";
                 ctx.beginPath();
                 ctx.moveTo(-size/2 + radius, -size/2);
                 ctx.lineTo(size/2 - radius, -size/2);
@@ -156,12 +160,13 @@
                 ctx.fill();
                 ctx.shadowBlur=0;
                 ctx.restore();
+                ctx.globalAlpha = 0.95
             }
 
             function drawTriangle(obs){
-                ctx.shadowColor = "#ff4444";
-                ctx.shadowBlur = 20;
-                ctx.fillStyle="#ff4444";
+                ctx.shadowColor = "rgba(255,255,255,0.2)";
+                ctx.shadowBlur = 10;
+                ctx.fillStyle="#bfbfbf";
                 ctx.beginPath();
                 ctx.moveTo(obs.x, groundY);
                 ctx.lineTo(obs.x + obs.width/2, groundY-obs.height);
@@ -202,6 +207,7 @@
                     if (xOverlap){
                         const centerX = (px+ps/2)-ox;
                         const t = centerX/ow;
+                        const triangleHeight = oh *(1-Math.abs(t -0.5)*2);
                         const groundAtX = groundY - triangleHeight;
                         if(py>groundAtX - ps){
                             endGame();
@@ -231,7 +237,7 @@
             function drawBackground(){
                 ctx.fillStyle ="#111";
                 ctx.fillRect(0,0,canvas.width,groundY);
-                ctx.strokeStyle = "rgba(0,255,204,0.03)";
+                ctx.strokeStyle = "rgba(255,255,255,0.04)";
                 ctx.lineWidth = 1;
 
                 const farGrid = 80;
@@ -243,7 +249,7 @@
                 const gridSize = 40;
                 //ctx.strokeStyle = "rgba(0,255,204,0,08)";
                 const glow = 0.05 + Math.sin(frameCount*0.03) * 0.03;
-                ctx.strokeStyle = `rgba(0,255,204,${glow})`;
+                ctx.strokeStyle = `rgba(255,255,255,${glow * 0.4})`;
                 ctx.lineWidth = 1;
 
                 for(let x=-gridSize + (bgMidOffset%gridSize); x<= canvas.width; x+= gridSize){
@@ -277,8 +283,8 @@
             function draw(){
                 ctx.clearRect(0,0,canvas.width,canvas.height);
                 drawBackground();
-                ctx.fillStyle="#333";
-                ctx.fillRect(0, groundY, canvas.width, 60);
+                ctx.fillStyle="rgba(255,255,255,0.08)";
+                ctx.fillRect(0, groundY, canvas.width, 1);
                 ctx.shadowColor = "#ff4444";
                 ctx.shadowBlur = 15;
                 ctx.fillStyle = "#ff4444";
