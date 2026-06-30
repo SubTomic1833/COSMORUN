@@ -120,6 +120,10 @@
             }
 
             function drawPlayer(){
+                ctx.shadowColor = "#00ffcc";
+                ctx.shadowBlur = 25;
+
+
                 ctx.fillStyle= "#00ffcc";
                 
                 let x = player.x;
@@ -139,9 +143,12 @@
                 ctx.quadraticCurveTo(x,y,x+r,y);
                 ctx.closePath();
                 ctx.fill();
+                ctx.shadowBlur = 0;
             }
 
             function drawTriangle(obs){
+                ctx.shadowColor = "#ff4444";
+                ctx.shadowBlur = 20;
                 ctx.fillStyle="#ff4444";
                 ctx.beginPath();
                 ctx.moveTo(obs.x, groundY);
@@ -149,6 +156,7 @@
                 ctx.lineTo(obs.x + obs.width, groundY);
                 ctx.closePath();
                 ctx.fill();
+                ctx.shadowBlur = 0;
             }
 
             function update(){
@@ -194,6 +202,11 @@
                 ctx.clearRect(0,0,canvas.width,canvas.height);
                 ctx.fillStyle="#333";
                 ctx.fillRect(0, groundY, canvas.width, 60);
+                ctx.shadowColor = "#ff4444";
+                ctx.shadowBlur = 15;
+                ctx.fillStyle = "#ff4444";
+                ctx.fillRect(0,groundY, canvas.width, 3);
+                ctx.shadowBlur = 0;
                 drawPlayer();
                 for(let obs of obstacles){
                     drawTriangle(obs);
